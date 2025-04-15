@@ -41,18 +41,20 @@ def create_app():
         app.config['SESSION_REDIS'] = redis_connection
         
 
-    # get CA file for DocumentDB (do this even if connecting to a local mongoDB for debugging of CA file download) 
-    import requests
-    logger.debug(f'About to grab global-bundle-pem')
-    r=requests.get("https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem")
-    filename="/tmp/global-bundle.pem"
-    ofh=open(filename,'w')
-    byes_written=ofh.write(r.text)
-    logger.debug(f'Wrote {byes_written} bytes to {filename}')
 
     # get secrets if necessary (but why not test DEPLYOMENT_ENV?)
     logger.debug("About to see if need to get secrets")
     if 'ONTOSERVER_USERNAME' not in os.environ:
+
+    # get CA file for DocumentDB (moved inside this block mar 25)) 
+        import requests
+        logger.debug(f'About to grab global-bundle-pem')
+        r=requests.get("https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem")
+        filename="/tmp/global-bundle.pem"
+        ofh=open(filename,'w')
+        byes_written=ofh.write(r.text)
+        logger.debug(f'Wrote {byes_written} bytes to {filename}')
+
         logger.debug("getting secrets")
         sm_client = boto3.client('secretsmanager', region_name='eu-west-2')
         pw_response = sm_client.get_secret_value(SecretId='vsmt-ontoserver-access')
@@ -87,9 +89,9 @@ def create_app():
                                                 # TypeError: '<=' not supported between instances of 'NoneType' and 'datetime.datetime'
 
         app.config['SESSION_USE_SIGNER'] = True
-        if "VSMT_DOCKER_COMPOSE" in os.environ: # this env var must be set in docker-compose.yaml
+        if "SETCHKS_APP_IN_DOCKER" in os.environ: # this env var must be set in docker-compose.yaml
             print("Configuring mongodb to connect to mongo-server docker")
-            app.config['SESSION_MONGODB']=MongoClient('mongo-server',27017)
+            app.config['SESSION_MONGODB']=MongoClient('host.docker.internal',27017) 
         else:
             print("Configuring mongodb to connect to localhost")
             app.config['SESSION_MONGODB']=MongoClient()

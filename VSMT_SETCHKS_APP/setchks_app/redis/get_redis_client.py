@@ -28,8 +28,13 @@ def get_redis_string():
         redis_string=f'rediss://{endpoint}:6379'
         logger.debug(f'redis_string={redis_string}')
     else:
-        logger.debug("Configuring redis to connect to localhost")
-        redis_string='redis://localhost:6379'
+        if "SETCHKS_APP_IN_DOCKER" in os.environ: # this env var must be set in docker-compose.yaml
+            logger.debug("Configuring redis to connect to host.docker.internal")
+            redis_string='redis://host.docker.internal:6379'
+        else:
+            logger.debug("Configuring redis to connect to localhost")
+            redis_string='redis://localhost:6379'
+        
     return redis_string
 
 def get_redis_client():

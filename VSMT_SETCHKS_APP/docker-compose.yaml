@@ -1,25 +1,32 @@
 version: "0.1"
 services:
   setchks_app:
-    image: cjezzerc/vsmt_setchks_app
+    image: vsmt_setchks_app
     depends_on:
       - redis-server
-      - mongo-server
     ports:
       - 5000:5000
+    env_file: "<ADD-PATH-HERE>/app.env" # Do NOT store app.env in this folder
+                                        # to prevent accidental push to git repo
+                                        # see below for required contents
     environment:
-      - ONTOSERVER_USERNAME
-      - ONTOSERVER_SECRET
-      - VSMT_DOCKER_COMPOSE=YES
-      - ONTOSERVER_INSTANCE=https://dev.ontology.nhs.uk/dev1/fhir/
-      - ONTOAUTH_INSTANCE=https://dev.ontology.nhs.uk/authorisation/auth/realms/terminology/protocol/openid-connect/token
-
+      - SETCHKS_APP_IN_DOCKER=YES # this can be set to anything; only its existence is tested for
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # probably only works on Windows
   redis-server:
     image: redis
     ports:
       - 6379:6379
 
-  mongo-server:
-    image: mongo
-    ports:
-      - 27017:27017
+# assumption is that mongodb is running natively (ie not in a docker) for simplicity of 
+# having the SNOMED CT data persistent.
+
+# app.env should contain (uncommented, and with RHS filled in):
+
+# ONTOSERVER_INSTANCE=
+# ONTOAUTH_INSTANCE=
+# ONTOSERVER_USERNAME=
+# ONTOSERVER_SECRET=
+# TRUDAPIKEY=
+# DEPLOYMENT_ENV=LOCAL
+# FLASK_APP_SECRET=             (any old guid)
