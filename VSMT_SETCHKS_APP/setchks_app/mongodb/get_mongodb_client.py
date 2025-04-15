@@ -50,6 +50,10 @@ def get_mongodb_client():
             logger.debug(f"Configuring mongodb to connect from WSL2 to {IP_HOST}")
             mongodb_client=MongoClient(f'mongodb://{IP_HOST}:27017/')
         else:
-            logger.debug("Configuring mongodb to connect to localhost")
-            mongodb_client=MongoClient()   
+            if "SETCHKS_APP_IN_DOCKER" in os.environ: # this env var must be set in docker-compose.yaml
+                logger.debug("Configuring mongodb to connect to host.docker.internal")
+                mongodb_client=MongoClient('host.docker.internal',27017)
+            else:
+                logger.debug("Configuring mongodb to connect to localhost")
+                mongodb_client=MongoClient()   
     return mongodb_client

@@ -8,22 +8,21 @@ WORKDIR /app_home
 COPY . . 
 
 #deal with rogue Windows line endings causing env to pick up wrong argument
-# WORKDIR /app_home/VSMT_SETCHKS_APP
-WORKDIR /app_home
-# RUN tr -d '\r' <run_app.py >clean_run_app.py 
-# RUN chmod +x clean_run_app.py
+WORKDIR /app_home/VSMT_SETCHKS_APP
+RUN tr -d '\r' <run_app.py >clean_run_app.py 
+RUN chmod +x clean_run_app.py
 
-# ENV ONTOSERVER_INSTANCE=https://dev.ontology.nhs.uk/dev1/fhir/
-# ENV ONTOAUTH_INSTANCE=https://dev.ontology.nhs.uk/authorisation/auth/realms/terminology/protocol/openid-connect/token
+ENV ONTOSERVER_INSTANCE=https://dev.ontology.nhs.uk/dev1/fhir/
+ENV ONTOAUTH_INSTANCE=https://dev.ontology.nhs.uk/authorisation/auth/realms/terminology/protocol/openid-connect/token
 
 # pass in --build-arg DEPLOYMENT_ENV=    LOCAL or AWS
 # pass in --build-arg DEPLOYMENT_AWSENV=    DEMO or TEST
-# ARG DEPLOYMENT_ENV 
-# ENV DEPLOYMENT_ENV=$DEPLOYMENT_ENV
-# ARG DEPLOYMENT_AWSENV 
-# ENV DEPLOYMENT_AWSENV=$DEPLOYMENT_AWSENV
-# ARG VERSION
-# ENV VERSION=$VERSION
+ARG DEPLOYMENT_ENV 
+ENV DEPLOYMENT_ENV=$DEPLOYMENT_ENV
+ARG DEPLOYMENT_AWSENV 
+ENV DEPLOYMENT_AWSENV=$DEPLOYMENT_AWSENV
+ARG VERSION
+ENV VERSION=$VERSION
 
 RUN pip install -r requirements.txt
 
@@ -36,5 +35,4 @@ RUN ["apt-get", "install", "-y", "vim"]
 
 EXPOSE 5000
 
-# CMD cd /app_home/VSMT_SETCHKS_APP; ./clean_run_app.py
-CMD cd /app_home; python run_app.py
+CMD cd /app_home/VSMT_SETCHKS_APP; ./clean_run_app.py
